@@ -198,13 +198,13 @@ w_spacer_create(void) {
 static int
 spacer_connect (void) {
     print("Connect was called");
-  gtkui_plugin = (ddb_gtkui_t *)deadbeef->plug_get_for_id(DDB_GTKUI_PLUGIN_ID);
-  //If GTK UI plugin isn't loaded
-  if(!gtkui_plugin) {
-      return -1;
-  }
-  gtkui_plugin->w_reg_widget("Spacer", 0, w_spacer_create, SPACER_WIDGET_TYPE, NULL);
-    return 0;
+	  gtkui_plugin = (ddb_gtkui_t *)deadbeef->plug_get_for_id(DDB_GTKUI_PLUGIN_ID);
+	  //If GTK UI plugin isn't loaded
+	  if(!gtkui_plugin) {
+	      return -1;
+	  }
+	  gtkui_plugin->w_reg_widget("Spacer", 0, w_spacer_create, SPACER_WIDGET_TYPE, NULL);
+	    return 0;
 }
 
 static int
@@ -233,7 +233,7 @@ DB_misc_t plugin = {
 
 extern DB_plugin_t *
 ddb_spacer_load (DB_functions_t *ddb) {
-        print("Load was called");
+    print("Load was called");
     deadbeef = ddb;
     return DB_PLUGIN(&plugin);
 }
