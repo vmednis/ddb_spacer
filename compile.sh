@@ -1,3 +1,4 @@
+#Will have to do until I write the Makefile
 echo "Cleaning up!"
 rm spacer.o
 rm ddb_spacer.so
