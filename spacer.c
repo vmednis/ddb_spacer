@@ -205,15 +205,15 @@ w_spacer_create(void) {
 static int
 spacer_connect (void) {
     print("Connect was called");
-	  gtkui_plugin = (ddb_gtkui_t *)deadbeef->plug_get_for_id(DDB_GTKUI_PLUGIN_ID);
+    gtkui_plugin = (ddb_gtkui_t *)deadbeef->plug_get_for_id(DDB_GTKUI_PLUGIN_ID);
 
     //If GTK UI plugin isn't loaded or uses wrong gtk version
-	  if(!gtkui_plugin) {
+    if(!gtkui_plugin) {
         print("GTK UI not loaded or wrong version (i.e. gtk2 for gtk3 and vice versa)!");
-	      return -1;
-	  }
-	  gtkui_plugin->w_reg_widget("Spacer", 0, w_spacer_create, SPACER_WIDGET_TYPE, NULL);
-	  return 0;
+        return -1;
+    }
+    gtkui_plugin->w_reg_widget("Spacer", 0, w_spacer_create, SPACER_WIDGET_TYPE, NULL);
+    return 0;
 }
 
 static int
