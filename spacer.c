@@ -36,7 +36,11 @@ static ddb_gtkui_t *gtkui_plugin;
 
 static void
 print(const char* str) {
-    printf("\e[1;32mSpacer: %s\e[0m\n", str);
+    #if GTK_CHECK_VERSION(3, 0, 0)
+    printf("\e[1;32mSpacer(gtk3): %s\e[0m\n", str);
+    #else
+    printf("\e[1;32mSpacer(gtk2): %s\e[0m\n", str);
+    #endif
 }
 
 typedef struct {
@@ -69,8 +73,6 @@ w_spacer_save(ddb_gtkui_widget_t *w, char *s, int sz) {
 const char *
 w_spacer_load(ddb_gtkui_widget_t *w, const char *type, const char *s) {
     w_spacer_t * widget = (w_spacer_t *) w;
-
-    print(s);
 
     int width, height;
 
@@ -127,8 +129,13 @@ w_spacer_menu_changesize(GtkWidget * menuitem, void * userdata) {
     GtkWidget * dialogcontent = gtk_dialog_get_content_area((GtkDialog *) dialog);
     gtk_orientable_set_orientation((GtkOrientable *) dialogcontent, GTK_ORIENTATION_VERTICAL);
 
+    #if GTK_CHECK_VERSION(3, 0, 0)
     GtkWidget * widthbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     GtkWidget * heightbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    #else
+    GtkWidget * widthbox = gtk_hbox_new(FALSE, 0);
+    GtkWidget * heightbox = gtk_hbox_new(FALSE, 0);
+    #endif
     gtk_container_add(GTK_CONTAINER(dialogcontent), widthbox);
     gtk_container_add(GTK_CONTAINER(dialogcontent), heightbox);
     gtk_box_set_child_packing((GtkBox *) dialogcontent, widthbox, TRUE, TRUE, 0, GTK_PACK_START);
@@ -199,17 +206,25 @@ static int
 spacer_connect (void) {
     print("Connect was called");
 	  gtkui_plugin = (ddb_gtkui_t *)deadbeef->plug_get_for_id(DDB_GTKUI_PLUGIN_ID);
-	  //If GTK UI plugin isn't loaded
+
+    //If GTK UI plugin isn't loaded or uses wrong gtk version
 	  if(!gtkui_plugin) {
+        print("GTK UI not loaded or wrong version (i.e. gtk2 for gtk3 and vice versa)!");
 	      return -1;
 	  }
 	  gtkui_plugin->w_reg_widget("Spacer", 0, w_spacer_create, SPACER_WIDGET_TYPE, NULL);
-	    return 0;
+	  return 0;
 }
 
 static int
 spacer_disconnect (void) {
-    gtkui_plugin->w_unreg_widget(SPACER_WIDGET_TYPE);
+    print("Disconnect called!");
+
+    if(gtkui_plugin) {
+        //Don't do this if gtkui plugin never existed
+        gtkui_plugin->w_unreg_widget(SPACER_WIDGET_TYPE);
+    }
+    gtkui_plugin = NULL;
     return 0;
 }
 
@@ -219,20 +234,30 @@ DB_misc_t plugin = {
     .plugin.type = DB_PLUGIN_MISC,
     .plugin.version_major = 1,
     .plugin.version_minor = 0,
-    .plugin.id = "spacer",
-    .plugin.name ="Spacer",
+    #if GTK_CHECK_VERSION(3, 0, 0)
+    .plugin.id = "spacer-gtk3",
+    .plugin.name ="Spacer (gtk3)",
+    #else
+    .plugin.id = "spacer-gtk2",
+    .plugin.name ="Spacer (gtk2)",
+    #endif
     .plugin.descr = "Provides GUI element that acts like a spacer so you can create that perfect layout.\n" \
                     "The size of the spacer can be changed in design mode.\n",
     .plugin.copyright = "Copyright (c) 2016 Valters Mednis\n\n" \
                         "Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\n" \
                         "The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\n"
                         "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.",
+    .plugin.website = "https://github.com/vmednis/ddb_spacer",
     .plugin.connect = spacer_connect,
     .plugin.disconnect = spacer_disconnect
 };
 
 extern DB_plugin_t *
-ddb_spacer_load (DB_functions_t *ddb) {
+#if GTK_CHECK_VERSION(3, 0, 0)
+ddb_spacer_gtk3_load (DB_functions_t *ddb) { //if using gtk3 or later
+#else
+ddb_spacer_gtk2_load (DB_functions_t *ddb) { //Otherwise we are obviously on gtk2
+#endif
     print("Load was called");
     deadbeef = ddb;
     return DB_PLUGIN(&plugin);
