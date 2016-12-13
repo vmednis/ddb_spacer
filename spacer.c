@@ -24,8 +24,8 @@
 #include <string.h>
 #include <gtk/gtk.h>
 
-#include </opt/deadbeef/include/deadbeef/deadbeef.h>
-#include </opt/deadbeef/include/deadbeef/gtkui_api.h>
+#include <deadbeef/deadbeef.h>
+#include <deadbeef/gtkui_api.h>
 
 
 #define SPACER_WIDGET_TYPE "spacer"
